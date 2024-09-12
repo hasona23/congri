@@ -12,6 +12,7 @@ Collidable (Rigid).
 
 you move with WASD and shoot with left click or E and aim with cursor
 before enemies spawning a group of red squars explode implying the release of enemies
+
 ==========================
-|    UNDER DEVELOPMENT   |
+  UNDER DEVELOPMENT   
 ==========================
