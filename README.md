@@ -11,8 +11,9 @@ tiles and turn them to nonCollidable tiles(Air)
 Collidable (Rigid).
 
 you move with WASD and shoot with left click or E and aim with cursor
-before enemies spawning a group of red squars explode implying the release of enemies
+before enemies spawning a group of red squars explode implying the release of enemeies
 
-==========================
-  UNDER DEVELOPMENT   
+
+
+UNDER DEVELOPMENT   
 ==========================
