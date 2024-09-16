@@ -1,14 +1,13 @@
 package utils
 
-import (
-	"github.com/hajimehoshi/ebiten/v2"
-)
+import "github.com/hajimehoshi/ebiten/v2"
 
 type Timer struct {
 	Time         float32
 	current_time float32
 }
 
+// time in seconds
 func NewTimer(time float32) Timer {
 	return Timer{Time: time, current_time: 0}
 }
@@ -26,11 +25,8 @@ func (timer *Timer) Ticked() bool {
 func (timer *Timer) Reset() {
 	timer.current_time = 0
 }
-func (timer *Timer) UpdateTimerTPS() {
-	if ebiten.ActualTPS() > 10 {
-		timer.current_time += 1 / float32(ebiten.TPS())
-	}
-}
 func (timer *Timer) UpdateTimer() {
-	timer.current_time += 1
+
+	timer.current_time += 1 / float32(ebiten.TPS())
+
 }

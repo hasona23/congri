@@ -24,6 +24,7 @@ const (
 )
 
 type ParticleSystem struct {
+	Name               string
 	Particles          []Particle
 	Motion             MotionType
 	Area               utils.Rect
@@ -43,7 +44,12 @@ func (ps ParticleSystem) Raduis() float32 {
 
 // default particle system
 func DefaultPS() ParticleSystem {
-	return ParticleSystem{make([]Particle, 64), Outward, utils.NewRect(0, 0, 16, 16), DefaultParticle(), false, utils.NewTimer(0), 0.0, 0, 0, 0}
+	return ParticleSystem{"", make([]Particle, 64), Outward, utils.NewRect(0, 0, 16, 16), DefaultParticle(), false, utils.NewTimer(0), 0.0, 0, 0, 0}
+}
+func WithName(name string) PSOptsFunc {
+	return func(ps *ParticleSystem) {
+		ps.Name = name
+	}
 }
 
 // x,y,width,heigt the area where particles spawn
@@ -157,7 +163,7 @@ func (ps *ParticleSystem) Update() {
 		return p.Speed <= 0 || p.Scale <= 0
 	})
 	if ps.IsLooped {
-		ps.SpawnTime.UpdateTimerTPS()
+		ps.SpawnTime.UpdateTimer()
 		if ps.SpawnTime.Ticked() {
 			ps.Spawn(ps.ParticleSpawnCount)
 		}

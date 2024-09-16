@@ -15,16 +15,18 @@ import (
 const (
 	PLAYER_RECT_SIZE = 16
 	ACCELRATION      = 0.75
+	PLAYER_FIRERATE  = 1
 )
 
 type Player struct {
 	DynamicEntity
-	hp int
+	hp       int
+	fireRate utils.Timer
 }
 
 // Update implements Entity.
 func NewPlayer(x, y float32) *Player {
-	return &Player{DynamicEntity: DynamicEntity{utils.Vec2{X: 4, Y: 4}, utils.Vec2{X: x, Y: y}, 1, "player", color.RGBA{128, 0, 129, 255}, false}, hp: HP}
+	return &Player{DynamicEntity: DynamicEntity{utils.Vec2{X: 4, Y: 4}, utils.Vec2{X: x, Y: y}, 1, "player", color.RGBA{128, 0, 129, 255}, false}, hp: HP, fireRate: utils.NewTimer(PLAYER_FIRERATE)}
 
 }
 func (p Player) IsDestroyed() bool {
@@ -47,6 +49,8 @@ func lerp(a, b, t float32) float32 {
 	return a + (b-a)*t
 }
 func (p *Player) Update() {
+	p.fireRate.UpdateTimer()
+	//fmt.Println(p.fireRate.GetCurrentTime())
 	p.Dir.X = float32(math.Round(float64(lerp(p.Dir.X, 0, ACCELRATION))))
 	p.Dir.Y = float32(math.Round(float64(lerp(p.Dir.Y, 0, ACCELRATION))))
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
@@ -61,7 +65,8 @@ func (p *Player) Update() {
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		p.Dir.X = float32(math.Round(float64(lerp(p.Dir.X, -1, ACCELRATION))))
 	}
-	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsKeyJustPressed(ebiten.KeyE) {
+
+	if (inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsKeyJustPressed(ebiten.KeyE)) && p.fireRate.Ticked() {
 		x, y := ebiten.CursorPosition()
 		x -= int(game.cam.X)
 		y -= int(game.cam.Y)
@@ -74,6 +79,11 @@ func (p *Player) Update() {
 	p.verticalCollision(dy)
 	p.constraintMovemnt()
 	// fmt.Printf("Velocity:%2v\n", p.Dir.X*p.speed)
+	for _, b := range game.entities["bullets"] {
+		if b.(*Bullet).rect().Collide(p.rect()) && b.(*Bullet).color == SniperColor {
+			p.hp -= 30
+		}
+	}
 }
 func (p *Player) horizontalCollision(dx int) {
 	collisions := map[string]bool{"right": false, "left": false}

@@ -23,7 +23,7 @@ func NewBullet(pos, dir utils.Vec2, speed float32) *Bullet {
 	dir.NormalizeDir()
 	b := &Bullet{
 		DynamicEntity: DynamicEntity{pos, dir, speed, "bullet", color.RGBA{0, 191, 255, 255}, false},
-		tilesCounter:  5,
+		tilesCounter:  8,
 	}
 	game.AddEntity(b)
 	return b
@@ -34,10 +34,10 @@ func (b Bullet) Type() string {
 func (b Bullet) IsDestroyed() bool {
 	if b.Destroyed || b.tilesCounter <= 0 {
 		particlesSystem := particles.NewParticleSystem(
-			particles.WithArea(utils.NewRect(int(b.Pos.X), int(b.Pos.Y), 16, 16)),
+			particles.WithArea(utils.NewRect(int(b.Pos.X)-8, int(b.Pos.Y)-8, 16, 16)),
 			particles.WithMotionType(particles.Outward),
 			particles.WithShrinking(0.075),
-			particles.WithModelParticle(*particles.NewParticle(particles.WithColor(color.RGBA{0, 191, 255, 255}), particles.WithScale(BULLET_SIZE/2),
+			particles.WithModelParticle(*particles.NewParticle(particles.WithColor(b.color), particles.WithScale(BULLET_SIZE/2),
 				particles.WithSpeed(1))))
 		particlesSystem.Spawn(10)
 		game.particles = append(game.particles, particlesSystem)
@@ -49,6 +49,13 @@ func (b *Bullet) Update() {
 	b.Pos.X += b.Dir.X * b.speed
 	b.Pos.Y += b.Dir.Y * b.speed
 	b.handleCollisions()
+	for _, e := range game.entities["bullet"] {
+		b2 := e.(*Bullet)
+		if b.rect().Collide(b2.rect()) && b2.color != b.color {
+			b.Destroyed = true
+			b2.Destroyed = true
+		}
+	}
 }
 func (b Bullet) Draw(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen, b.Pos.X+game.cam.X, b.Pos.Y+game.cam.Y, BULLET_SIZE, BULLET_SIZE, b.color, false)

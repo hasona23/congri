@@ -84,7 +84,7 @@ func NewAnimationFrame(row_min, row_max, col_min, col_max int, duration float32,
 
 // Updates Column and row number to affect the animsprite SubImage
 func (a *AnimationFrame) Update() {
-	a.Timer.UpdateTimerTPS()
+	a.Timer.UpdateTimer()
 	//fmt.Println(a.Timer.GetCurrentTime())
 	if a.Ticked() {
 
