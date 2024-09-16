@@ -64,7 +64,13 @@ func (g *Game) Update() error {
 	g.particles = slices.DeleteFunc(g.particles, func(ps *particles.ParticleSystem) bool {
 		if len(ps.Particles) == 0 && ps.Name == "spawn" {
 			x, y := ps.Area.Centre()
-			NewEnemy(utils.Vec2{X: float32(x), Y: float32(y)})
+			n := rand.Float32() * 100
+			if n > 50 {
+				NewBomber(utils.Vec2{X: float32(x), Y: float32(y)})
+			} else {
+				NewSniper(utils.Vec2{X: float32(x), Y: float32(y)})
+			}
+
 			return true
 		}
 		return false

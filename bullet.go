@@ -14,14 +14,16 @@ const (
 )
 
 type Bullet struct {
+	Shooter string
 	DynamicEntity
 	tilesCounter int
 	currentTile  *Tile
 }
 
-func NewBullet(pos, dir utils.Vec2, speed float32) *Bullet {
+func NewBullet(Shooter string, pos, dir utils.Vec2, speed float32) *Bullet {
 	dir.NormalizeDir()
 	b := &Bullet{
+		Shooter:       Shooter,
 		DynamicEntity: DynamicEntity{pos, dir, speed, "bullet", color.RGBA{0, 191, 255, 255}, false},
 		tilesCounter:  8,
 	}
@@ -51,7 +53,7 @@ func (b *Bullet) Update() {
 	b.handleCollisions()
 	for _, e := range game.entities["bullet"] {
 		b2 := e.(*Bullet)
-		if b.rect().Collide(b2.rect()) && b2.color != b.color {
+		if b.rect().Collide(b2.rect()) && b2.Shooter != b.Shooter {
 			b.Destroyed = true
 			b2.Destroyed = true
 		}
@@ -66,7 +68,9 @@ func (b Bullet) rect() utils.Rect {
 	return utils.NewRect(int(b.Pos.X), int(b.Pos.Y), BULLET_SIZE, BULLET_SIZE)
 }
 func (b *Bullet) handleCollisions() {
-
+	if b.Shooter == "sniper" {
+		return
+	}
 	if tile := game.Tilemap.GetTile(b.Pos); tile != nil && tile.Variant == Rigid &&
 		b.rect().Collide(utils.NewRect(int(tile.X), int(tile.Y), TILE_SIZE, TILE_SIZE)) {
 		tile.Variant = Air

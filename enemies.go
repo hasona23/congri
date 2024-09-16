@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	ENEMY_SIZE  = 16
-	ENEMY_SPEED = 1
+	ENEMY_SIZE         = 16
+	ENEMY_SPEED        = 1
+	ENEMY_BULLET_SPEED = 1.5
 )
 
 var BomberColor = color.RGBA{255, 0, 0, 255}
@@ -21,7 +22,7 @@ type Bomber struct {
 	DynamicEntity
 }
 
-func NewEnemy(pos utils.Vec2) *Bomber {
+func NewBomber(pos utils.Vec2) *Bomber {
 	e := &Bomber{
 		DynamicEntity: DynamicEntity{pos, utils.Vec2{X: 0, Y: 0}, ENEMY_SPEED, "enemy", BomberColor, false},
 	}
@@ -114,7 +115,7 @@ func (s *Sniper) Update() {
 	player := game.entities["player"][0].(*Player)
 	s.fireRate.UpdateTimer()
 	if s.fireRate.Ticked() {
-		b := NewBullet(s.Pos, utils.Vec2{X: float32(player.Pos.X) - (s.Pos.X), Y: float32(player.Pos.Y) - (s.Pos.Y)}, 1.5)
+		b := NewBullet("sniper", s.Pos, utils.Vec2{X: float32(player.Pos.X) - (s.Pos.X), Y: float32(player.Pos.Y) - (s.Pos.Y)}, ENEMY_BULLET_SPEED)
 		b.color = s.color
 	}
 	if s.rect().Collide(player.rect()) {
@@ -122,7 +123,7 @@ func (s *Sniper) Update() {
 		player.hp -= 20
 	}
 	for _, b := range game.entities["bullet"] {
-		if b.(*Bullet).rect().Collide(s.rect()) && b.(*Bullet).color != SniperColor {
+		if b.(*Bullet).rect().Collide(s.rect()) && b.(*Bullet).Shooter != "sniper" {
 			s.Destroyed = true
 			b.(*Bullet).Destroyed = true
 			game.score++

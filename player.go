@@ -70,7 +70,7 @@ func (p *Player) Update() {
 		x, y := ebiten.CursorPosition()
 		x -= int(game.cam.X)
 		y -= int(game.cam.Y)
-		NewBullet(p.Pos, utils.Vec2{X: float32(x) - (p.Pos.X), Y: float32(y) - (p.Pos.Y)}, 2)
+		NewBullet("player", p.Pos, utils.Vec2{X: float32(x) - (p.Pos.X), Y: float32(y) - (p.Pos.Y)}, 2)
 	}
 	p.Dir.NormalizeDir()
 	dx := int(math.Round(float64(p.Dir.X * p.speed)))
@@ -79,9 +79,11 @@ func (p *Player) Update() {
 	p.verticalCollision(dy)
 	p.constraintMovemnt()
 	// fmt.Printf("Velocity:%2v\n", p.Dir.X*p.speed)
-	for _, b := range game.entities["bullets"] {
-		if b.(*Bullet).rect().Collide(p.rect()) && b.(*Bullet).color == SniperColor {
+	for _, b := range game.entities["bullet"] {
+		if b.(*Bullet).rect().Collide(p.rect()) && b.(*Bullet).Shooter == "sniper" {
 			p.hp -= 30
+			b.(*Bullet).Destroyed = true
+			fmt.Println("I GOT SHOT")
 		}
 	}
 }
