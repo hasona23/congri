@@ -10,14 +10,15 @@ import (
 )
 
 const (
-	BULLET_SIZE = 8
+	BULLET_SIZE     = 8
+	BULLET_LIFETIME = 4
 )
 
 type Bullet struct {
 	Shooter string
 	DynamicEntity
-	tilesCounter int
-	currentTile  *Tile
+	lifeTime    utils.Timer
+	currentTile *Tile
 }
 
 func NewBullet(Shooter string, pos, dir utils.Vec2, speed float32) *Bullet {
@@ -25,7 +26,7 @@ func NewBullet(Shooter string, pos, dir utils.Vec2, speed float32) *Bullet {
 	b := &Bullet{
 		Shooter:       Shooter,
 		DynamicEntity: DynamicEntity{pos, dir, speed, "bullet", color.RGBA{0, 191, 255, 255}, false},
-		tilesCounter:  8,
+		lifeTime:      utils.NewTimer(BULLET_LIFETIME),
 	}
 	game.AddEntity(b)
 	return b
@@ -34,7 +35,7 @@ func (b Bullet) Type() string {
 	return b.etype
 }
 func (b Bullet) IsDestroyed() bool {
-	if b.Destroyed || b.tilesCounter <= 0 {
+	if b.Destroyed {
 		particlesSystem := particles.NewParticleSystem(
 			particles.WithArea(utils.NewRect(int(b.Pos.X)-8, int(b.Pos.Y)-8, 16, 16)),
 			particles.WithMotionType(particles.Outward),
@@ -50,6 +51,10 @@ func (b Bullet) IsDestroyed() bool {
 func (b *Bullet) Update() {
 	b.Pos.X += b.Dir.X * b.speed
 	b.Pos.Y += b.Dir.Y * b.speed
+	b.lifeTime.UpdateTimer()
+	if b.lifeTime.Ticked() {
+		b.Destroyed = true
+	}
 	b.handleCollisions()
 	for _, e := range game.entities["bullet"] {
 		b2 := e.(*Bullet)
@@ -75,9 +80,6 @@ func (b *Bullet) handleCollisions() {
 		b.rect().Collide(utils.NewRect(int(tile.X), int(tile.Y), TILE_SIZE, TILE_SIZE)) {
 		tile.Variant = Air
 		tile.Color = color.White
-		b.tilesCounter--
-		//b.currentTile = tile
-		//	fmt.Println(b.tilesCounter)
 	}
 
 }

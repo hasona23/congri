@@ -15,7 +15,7 @@ import (
 const (
 	PLAYER_RECT_SIZE = 16
 	ACCELRATION      = 0.75
-	PLAYER_FIRERATE  = 1
+	PLAYER_FIRERATE  = 0.75
 )
 
 type Player struct {
@@ -66,7 +66,7 @@ func (p *Player) Update() {
 		p.Dir.X = float32(math.Round(float64(lerp(p.Dir.X, -1, ACCELRATION))))
 	}
 
-	if (inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsKeyJustPressed(ebiten.KeyE)) && p.fireRate.Ticked() {
+	if (inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || ebiten.IsKeyPressed(ebiten.KeyE)) && p.fireRate.Ticked() {
 		x, y := ebiten.CursorPosition()
 		x -= int(game.cam.X)
 		y -= int(game.cam.Y)

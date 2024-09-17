@@ -117,6 +117,7 @@ func (s *Sniper) Update() {
 	if s.fireRate.Ticked() {
 		b := NewBullet("sniper", s.Pos, utils.Vec2{X: float32(player.Pos.X) - (s.Pos.X), Y: float32(player.Pos.Y) - (s.Pos.Y)}, ENEMY_BULLET_SPEED)
 		b.color = s.color
+		b.lifeTime = utils.NewTimer(BULLET_LIFETIME * 2)
 	}
 	if s.rect().Collide(player.rect()) {
 		s.Destroyed = true
