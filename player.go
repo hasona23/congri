@@ -20,12 +20,15 @@ const (
 type Player struct {
 	DynamicEntity
 	hp       int
+	mana     int
 	fireRate utils.Timer
 }
 
+var directions []utils.Vec2 = []utils.Vec2{{X: 1, Y: 1}, {X: 1, Y: 0}, {X: 0, Y: 1}, {X: -1, Y: 0}, {X: 0, Y: -1}, {X: -1, Y: -1}, {X: 1, Y: -1}, {X: -1, Y: 1}}
+
 // Update implements Entity.
 func NewPlayer(x, y float32) *Player {
-	return &Player{DynamicEntity: DynamicEntity{utils.Vec2{X: 4, Y: 4}, utils.Vec2{X: x, Y: y}, 1, "player", color.RGBA{128, 0, 129, 255}, false}, hp: HP, fireRate: utils.NewTimer(PLAYER_FIRERATE)}
+	return &Player{DynamicEntity: DynamicEntity{utils.Vec2{X: 4, Y: 4}, utils.Vec2{X: x, Y: y}, 1, "player", color.RGBA{128, 0, 129, 255}, false}, hp: HP, mana: 100, fireRate: utils.NewTimer(PLAYER_FIRERATE)}
 
 }
 func (p Player) IsDestroyed() bool {
@@ -49,6 +52,7 @@ func lerp(a, b, t float32) float32 {
 }
 func (p *Player) Update() {
 	p.fireRate.UpdateTimer()
+	p.mana = int(math.Min(math.Max(0, float64(p.mana)), 100))
 	//fmt.Println(p.fireRate.GetCurrentTime())
 	p.Dir.X = float32(math.Round(float64(lerp(p.Dir.X, 0, ACCELRATION))))
 	p.Dir.Y = float32(math.Round(float64(lerp(p.Dir.Y, 0, ACCELRATION))))
@@ -63,6 +67,14 @@ func (p *Player) Update() {
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		p.Dir.X = float32(math.Round(float64(lerp(p.Dir.X, -1, ACCELRATION))))
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) && p.mana >= 100 {
+
+		for _, dir := range directions {
+			NewBullet("player", p.Pos, dir, 2)
+		}
+		p.mana = 0
+
 	}
 
 	if (inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || ebiten.IsKeyPressed(ebiten.KeyE)) && p.fireRate.Ticked() {

@@ -64,6 +64,7 @@ func (e *Bomber) Update() {
 			e.Destroyed = true
 			b.(*Bullet).Destroyed = true
 			game.score++
+			game.entities["player"][0].(*Player).mana += 25
 		}
 	}
 	tile := game.Tilemap.GetTile(e.Pos)
@@ -128,6 +129,7 @@ func (s *Sniper) Update() {
 			s.Destroyed = true
 			b.(*Bullet).Destroyed = true
 			game.score++
+			game.entities["player"][0].(*Player).mana += 25
 		}
 	}
 

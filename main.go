@@ -57,8 +57,10 @@ func (g *Game) Init() {
 	mainLayout := ui.NewUILayout("main")
 	hpBar := ui.NewBar(5, 5, g.entities["player"][0].(*Player).hp, 8, utils.Point{X: 1, Y: 1}, color.RGBA{255, 0, 100, 255}, color.Gray{123})
 	mainLayout.AddBar("hp", hpBar)
-	score := ui.NewLabel(fmt.Sprintf("Score:%v", g.score), 5, 15, font, 16, color.RGBA{0, 100, 255, 255})
+	score := ui.NewLabel(fmt.Sprintf("Score:%v", g.score), 5, 24, font, 16, color.RGBA{0, 100, 255, 255})
 	mainLayout.AddLabel("score", score)
+	manaBar := ui.NewBar(5, 16, g.entities["player"][0].(*Player).mana, 8, utils.Point{X: 1, Y: 1}, color.RGBA{100, 0, 255, 255}, color.Gray{123})
+	mainLayout.AddBar("mana", manaBar)
 	g.ui[States.Main] = mainLayout
 
 }
@@ -71,10 +73,12 @@ func (g *Game) Update() error {
 	case States.Menu:
 		g.ui[States.Menu].Update()
 	case States.Main:
+		player := g.entities["player"][0].(*Player)
 		g.ui[States.Main].Update()
 		bar, _ := g.ui[States.Main].GetBar("hp")
-		bar.SetValue(g.entities["player"][0].(*Player).hp)
-		player := g.entities["player"][0].(*Player)
+		bar.SetValue(player.hp)
+		mbar, _ := g.ui[States.Main].GetBar("mana")
+		mbar.SetValue(player.mana)
 		label, _ := g.ui[States.Main].GetLabel("score")
 		label.SetText(fmt.Sprintf("score: %v", g.score))
 		g.cam.FollowTarget(player.Pos.X, player.Pos.Y, 320, 240, 2)
