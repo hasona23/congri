@@ -16,7 +16,7 @@ const (
 )
 
 var BomberColor = color.RGBA{255, 0, 0, 255}
-var SniperColor = color.RGBA{255, 240, 0, 255}
+var SniperColor = color.RGBA{255, 240, 120, 255}
 
 type Bomber struct {
 	DynamicEntity

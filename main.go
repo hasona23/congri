@@ -9,7 +9,6 @@ import (
 	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hasona23/game/particles"
 	"github.com/hasona23/game/ui"
 	"github.com/hasona23/game/utils"
@@ -41,11 +40,12 @@ func (g *Game) Init() {
 	g.AddEntity(NewPlayer(5, 5))
 	g.enemySpawner = utils.NewTimer(SPAWN_TIME)
 	g.state = States.Menu
+	g.score = 0
 	//UI===============================
+	//main menu
 	g.ui = make(map[State]*ui.UILayout)
 	menuLayout := ui.NewUILayout("menu")
 	startbtn := ui.NewButton("Start", 120, 120, 16, 2, font, color.White, color.Black, color.Black)
-
 	startbtn.AddClickEvent(func(b *ui.Button) { g.state = States.Main })
 	exitbtn := ui.NewButton("Exit", 120, 160, 16, 2, font, color.White, color.Black, color.Black)
 	exitbtn.AddClickEvent(func(b *ui.Button) { os.Exit(0) })
@@ -53,6 +53,14 @@ func (g *Game) Init() {
 	menuLayout.AddButton("exitbtn", exitbtn)
 	menuLayout.ApplyHoverToAllButtons(onhover)
 	g.ui[States.Menu] = menuLayout
+	//game ui
+	mainLayout := ui.NewUILayout("main")
+	hpBar := ui.NewBar(5, 5, g.entities["player"][0].(*Player).hp, 8, utils.Point{X: 1, Y: 1}, color.RGBA{255, 0, 100, 255}, color.Gray{123})
+	mainLayout.AddBar("hp", hpBar)
+	score := ui.NewLabel(fmt.Sprintf("Score:%v", g.score), 5, 15, font, 16, color.RGBA{0, 100, 255, 255})
+	mainLayout.AddLabel("score", score)
+	g.ui[States.Main] = mainLayout
+
 }
 func onhover(b *ui.Button) {
 	b.Style.BorderColor = color.White
@@ -63,8 +71,12 @@ func (g *Game) Update() error {
 	case States.Menu:
 		g.ui[States.Menu].Update()
 	case States.Main:
-
+		g.ui[States.Main].Update()
+		bar, _ := g.ui[States.Main].GetBar("hp")
+		bar.SetValue(g.entities["player"][0].(*Player).hp)
 		player := g.entities["player"][0].(*Player)
+		label, _ := g.ui[States.Main].GetLabel("score")
+		label.SetText(fmt.Sprintf("score: %v", g.score))
 		g.cam.FollowTarget(player.Pos.X, player.Pos.Y, 320, 240, 2)
 		g.cam.Constrain(g.Tilemap.GetWidth(), g.Tilemap.GetHieght(), 320, 240)
 		g.enemySpawner.UpdateTimer()
@@ -97,7 +109,7 @@ func (g *Game) Update() error {
 			if len(ps.Particles) == 0 && ps.Name == "spawn" {
 				x, y := ps.Area.Centre()
 				n := rand.Float32() * 100
-				if n > 50 {
+				if n > 25 {
 					NewBomber(utils.Vec2{X: float32(x), Y: float32(y)})
 				} else {
 					NewSniper(utils.Vec2{X: float32(x), Y: float32(y)})
@@ -120,26 +132,13 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	switch g.state {
-	case States.Menu:
+	switch {
+	case g.state == States.Menu:
 		screen.Fill(color.Black)
 		g.ui[States.Menu].Draw(screen)
-	case States.Main:
+	case g.state == States.Main || g.state == States.Pause:
 		screen.Fill(color.RGBA{100, 50, 120, 255})
 		g.Tilemap.Draw(screen)
-		/*for x := range int(GRID_SIZE) {
-			for y := range int(GRID_SIZE) {
-				tile := g.Tilemap.GetTile(utils.Vec2{X: float32(x * TILE_SIZE), Y: float32(y * TILE_SIZE)})
-				if tile != nil {
-					if tile.Variant == Rigid {
-						vector.DrawFilledRect(screen, float32(tile.X)+g.cam.X, float32(tile.Y)+g.cam.Y, TILE_SIZE, TILE_SIZE, color.RGBA{0, 255, 0, 255}, false)
-					} else {
-						vector.DrawFilledRect(screen, float32(tile.X)+g.cam.X, float32(tile.Y)+g.cam.Y, TILE_SIZE, TILE_SIZE, color.RGBA{0, 0, 255, 255}, false)
-
-					}
-				}
-			}
-		}*/
 		for _, ps := range g.particles {
 			ps.DrawCam(screen, g.cam)
 		}
@@ -148,8 +147,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				entities[i].Draw(screen)
 			}
 		}
-		//###########Temporary UI####################################
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Score:%v", g.score), 0, 10)
+		g.ui[States.Main].Draw(screen)
+	case g.state == States.Pause:
 
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/hasona23/game/utils"
@@ -36,7 +35,7 @@ func (p Player) Type() string {
 	return p.etype
 }
 func (p Player) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v", p.hp), int(p.Pos.X)+int(game.cam.X)-2, int(p.Pos.Y)-12+int(game.cam.Y))
+	//	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v", p.hp), int(p.Pos.X)+int(game.cam.X)-2, int(p.Pos.Y)-12+int(game.cam.Y))
 	vector.DrawFilledRect(screen, p.Pos.X+game.cam.X, p.Pos.Y+game.cam.Y, PLAYER_RECT_SIZE, PLAYER_RECT_SIZE, p.color, false)
 	// Draw nearby tile boundaries
 	/*for _, tile := range p.GetNearTiles() {
